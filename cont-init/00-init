@@ -1,0 +1,16 @@
+#!/usr/bin/with-contenv sh
+
+if [ $(grep -ci $CUPSADMIN /etc/shadow) -eq 0 ]; then
+    useradd -r -G lpadmin -M $CUPSADMIN
+
+    echo $CUPSADMIN:$CUPSPASSWORD | chpasswd
+
+    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime
+    dpkg-reconfigure --frontend noninteractive tzdata
+fi
+
+if [ ! -f /etc/cups/cupsd.conf ]; then
+    cp -rpn /etc/cups-bak/* /etc/cups/
+fi
+
+exec /usr/sbin/cupsd -f
